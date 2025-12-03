@@ -1,0 +1,67 @@
+
+<%- include('partials/header') %>
+<section class="event-details">
+  <h1><%= event.title %></h1>
+  <div class="event-meta">
+    <p><strong>Date:</strong> <%= event.event_date.toISOString().slice(0,10) %></p>
+    <p><strong>Venue:</strong> <%= event.venue %></p>
+    <p><strong>Fee:</strong> ₹<%= event.fee %></p>
+    <p><strong>Seats Left:</strong> <%= seats_left %></p>
+  </div>
+  <p class="event-desc"><%= event.description %></p>
+
+  <% if (user) { %>
+    <form action="/register/<%= event.event_id %>" method="POST" class="register-form">
+      <label>Tickets:
+        <input type="number" name="ticket_count" min="1" max="<%= seats_left %>" value="1" required>
+      </label>
+      <button type="submit" class="btn">Book Tickets</button>
+    </form>
+  <% } else { %>
+    <p><a href="/login" class="btn">Login to Register</a></p>
+  <% } %>
+</section>
+
+<section class="reviews-section">
+  <h2>Reviews</h2>
+  <% if (reviews && reviews.length > 0) { %>
+    <div class="reviews-list">
+      <% reviews.forEach(function(review) { %>
+        <div class="review-card">
+          <div class="review-header">
+            <span class="review-user"><%= review.name %></span>
+            <span class="review-rating">Rating: <%= review.rating %> / 5</span>
+            <span class="review-date"><%= review.created_at.toISOString().slice(0,10) %></span>
+          </div>
+          <div class="review-comment"><%= review.comment %></div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <p>No reviews yet. Be the first to review this event!</p>
+  <% } %>
+
+  <% if (user) { %>
+    <% if (!userHasReviewed) { %>
+      <form action="/reviews/<%= event.event_id %>" method="POST" class="review-form">
+        <label for="rating">Your Rating:</label>
+        <select name="rating" id="rating" required>
+          <option value="">Select</option>
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Good</option>
+          <option value="3">3 - Average</option>
+          <option value="2">2 - Poor</option>
+          <option value="1">1 - Terrible</option>
+        </select>
+        <label for="comment">Comment:</label>
+        <textarea name="comment" id="comment" rows="3" maxlength="500" required></textarea>
+        <button type="submit" class="btn">Submit Review</button>
+      </form>
+    <% } else { %>
+      <p class="success-message">You have already reviewed this event.</p>
+    <% } %>
+  <% } else { %>
+    <p><a href="/login" class="btn">Login to submit a review</a></p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

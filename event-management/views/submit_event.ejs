@@ -1,0 +1,68 @@
+<%- include('partials/header') %>
+<section class="form-section">
+  <h1>📅 Submit Your Event</h1>
+  
+  <% if (typeof success !== 'undefined') { %>
+    <div class="success-message">
+      <h3>✅ Success!</h3>
+      <p><%= success %></p>
+      <a href="/user-events/my-submissions" class="btn">View My Submissions</a>
+    </div>
+  <% } else { %>
+    
+    <% if (typeof error !== 'undefined') { %>
+      <div class="error-message">
+        <h3>❌ Error</h3>
+        <p><%= error %></p>
+      </div>
+    <% } %>
+    
+    <div class="submit-info">
+      <h3>🌟 Share Your Event with the Community!</h3>
+      <p>Submit your event for review and approval. Once approved, it will be visible to all users and they can register for it.</p>
+      
+      <div class="submission-process">
+        <div class="step">
+          <span class="step-number">1</span>
+          <span>Fill out the form below</span>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <span>Admin reviews your submission</span>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <span>Event goes live on the platform</span>
+        </div>
+      </div>
+    </div>
+    
+    <form action="/user-events/submit" method="POST" class="form-card">
+      <label for="title">Event Title *</label>
+      <input type="text" id="title" name="title" required placeholder="Enter a catchy event title">
+      
+      <label for="description">Event Description *</label>
+      <textarea id="description" name="description" required rows="4" placeholder="Describe your event in detail - what attendees can expect, key highlights, etc."></textarea>
+      
+      <label for="event_date">Event Date & Time *</label>
+      <input type="datetime-local" id="event_date" name="event_date" required>
+      
+      <label for="venue">Venue *</label>
+      <input type="text" id="venue" name="venue" required placeholder="Event location or online platform">
+      
+      <label for="capacity">Maximum Attendees *</label>
+      <input type="number" id="capacity" name="capacity" required min="1" placeholder="Maximum number of participants">
+      
+      <label for="fee">Ticket Price (₹)</label>
+      <input type="number" id="fee" name="fee" min="0" step="0.01" placeholder="0 for free events">
+      
+      <button type="submit" class="btn full">🚀 Submit Event for Review</button>
+      
+      <p class="form-note">
+        <strong>Note:</strong> All submissions are reviewed by our admin team. This process typically takes 24-48 hours. 
+        You'll be able to track the status of your submission in "My Submissions".
+      </p>
+    </form>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

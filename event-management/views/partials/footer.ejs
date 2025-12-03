@@ -1,0 +1,16 @@
+</main>
+<footer class="footer">
+  <p>© 2025 Evantra. All Rights Reserved.</p>
+  <% if (typeof stats !== 'undefined') { %>
+    <div class="footer-stats">
+      <span>Users: <strong><%= stats.totalUsers %></strong></span>
+      <span> | Registrations: <strong><%= stats.totalRegistrations %></strong></span>
+      <span> | Rating: <strong><%= stats.avgRating !== null ? stats.avgRating + ' / 5' : 'N/A' %></strong> (<%= stats.ratingCount %>)</span>
+    </div>
+  <% } %>
+</footer>
+<script src="/js/theme.js"></script>
+<script src="/js/event-filters.js"></script>
+</body>
+</html>
+

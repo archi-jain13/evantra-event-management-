@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <h1>My Registered Events</h1>
+  <% if (registrations.length === 0) { %>
+    <p>You haven’t registered for any events yet.</p>
+  <% } else { %>
+    <div class="event-grid">
+      <% registrations.forEach(r => { %>
+        <div class="event-card">
+          <h2><%= r.title %></h2>
+          <p>Tickets: <%= r.ticket_count %></p>
+          <p>Amount: ₹<%= r.amount %> — <span class="status <%= r.status %>"><%= r.status %></span></p>
+          <p>📅 <%= r.event_date.toISOString().slice(0,10) %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

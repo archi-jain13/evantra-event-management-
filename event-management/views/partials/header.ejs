@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Evantra - Event Management</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<header class="navbar">
+  <div class="logo">
+    <a href="/events">
+      <svg class="logo-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" opacity="0.2"/>
+        <path d="M20 8 L28 15 L26 26 L20 32 L14 26 L12 15 Z" fill="url(#logoGradient)" stroke="white" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="4" fill="white"/>
+        <defs>
+          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">Evantra</span>
+    </a>
+  </div>
+  <nav class="nav-links">
+    <a href="/events">Home</a>
+    <% if (user) { %>
+      <a href="/register">My Events</a>
+      <a href="/user-events/submit" class="create-event-link">+ Create Event</a>
+      <a href="/user-events/my-submissions">My Submissions</a>
+      <% if (user.role === 'admin') { %>
+        <a href="/admin">Admin</a>
+        <a href="/admin/create" class="admin-create-link">+ Admin Create</a>
+      <% } %>
+      <a href="/logout">Logout</a>
+      <span class="welcome">Hi, <%= user.name %></span>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Sign Up</a>
+    <% } %>
+  </nav>
+
+  <!-- 🌗 Dark Mode Toggle -->
+  <div class="toggle-container">
+    <input type="checkbox" id="dark-toggle">
+    <label for="dark-toggle" class="toggle-label">🌙</label>
+  </div>
+</header>
+
+<main class="content">

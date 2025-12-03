@@ -1,0 +1,77 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <h1>Upcoming Events</h1>
+  
+  <!-- Event Filter & Search System -->
+  <div class="filter-section">
+    <div class="filter-header">
+      Event Discovery & Filters
+    </div>
+    
+    <div class="filter-controls">
+      <select id="categoryFilter" class="filter-select">
+        <option value="">All Categories</option>
+        <option value="technology">Technology</option>
+        <option value="business">Business</option>
+        <option value="creative">Creative</option>
+        <option value="wellness">Health & Wellness</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="environment">Environment</option>
+      </select>
+      
+      <select id="priceFilter" class="filter-select">
+        <option value="">All Prices</option>
+        <option value="free">Free Events</option>
+        <option value="under-1000">Under ₹1,000</option>
+        <option value="1000-2000">₹1,000 - ₹2,000</option>
+        <option value="over-2000">Over ₹2,000</option>
+      </select>
+      
+      <button id="clearFilters" class="clear-filters">Clear All</button>
+    </div>
+    
+    <div id="filterStats" class="filter-stats">
+      Showing all events
+    </div>
+  </div>
+  
+  <div class="event-grid" id="eventGrid">
+    <% if (events.length === 0) { %>
+      <p>No events available right now.</p>
+    <% } %>
+    <% events.forEach(event => { %>
+      <div class="event-card">
+        <h2><%= event.title %></h2>
+        <!-- Description removed from home page to keep listing compact; view details for full description -->
+        <div class="event-info">
+          <span>📅 <%= event.event_date.toISOString().slice(0,10) %></span>
+          <span>📍 <%= event.venue %></span>
+        </div>
+        <p class="fee">💰 ₹<%= event.fee %></p>
+        <a href="/events/<%= event.event_id %>" class="btn">View Details</a>
+      </div>
+    <% }) %>
+  </div>
+</section>
+<% if (typeof stats !== 'undefined') { %>
+  <section class="efficiency-section" aria-label="site-summary">
+    <div class="efficiency-cards">
+      <div class="eff-card">
+        <div class="card-title">Total Users</div>
+        <div class="card-value"><%= stats.totalUsers %></div>
+      </div>
+
+      <div class="eff-card">
+        <div class="card-title">Total Registrations</div>
+        <div class="card-value"><%= stats.totalRegistrations %></div>
+      </div>
+
+      <div class="eff-card">
+        <div class="card-title">Overall Rating</div>
+        <div class="card-value"><%= stats.avgRating !== null ? stats.avgRating + ' / 5' : 'No ratings' %></div>
+        <div class="card-sub">(<%= stats.ratingCount %> reviews)</div>
+      </div>
+    </div>
+  </section>
+<% } %>
+<%- include('partials/footer') %>

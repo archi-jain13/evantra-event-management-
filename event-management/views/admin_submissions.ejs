@@ -1,0 +1,114 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <h1>📋 Event Submissions Management</h1>
+  
+  <div class="admin-actions">
+    <a href="/admin" class="btn">← Back to Dashboard</a>
+    <a href="/admin/create" class="btn add-btn">➕ Create Event</a>
+  </div>
+  
+  <% if (submissions.length === 0) { %>
+    <div class="no-submissions">
+      <h3>📝 No submissions to review</h3>
+      <p>There are no event submissions waiting for review.</p>
+    </div>
+  <% } else { %>
+    <div class="submissions-admin-grid">
+      <% submissions.forEach(submission => { %>
+        <div class="admin-submission-card status-<%= submission.status %>">
+          <div class="submission-header">
+            <h2><%= submission.title %></h2>
+            <span class="status-badge <%= submission.status %>">
+              <% if (submission.status === 'pending') { %>
+                ⏳ Pending Review
+              <% } else if (submission.status === 'approved') { %>
+                ✅ Approved
+              <% } else { %>
+                ❌ Rejected
+              <% } %>
+            </span>
+          </div>
+          
+          <div class="submitter-info">
+            <strong>👤 Submitted by:</strong> <%= submission.submitter_name %> (<%= submission.submitter_email %>)
+            <br>
+            <strong>📅 Submitted:</strong> <%= new Date(submission.submitted_at).toLocaleDateString() %>
+          </div>
+          
+          <p class="submission-description"><%= submission.description %></p>
+          
+          <div class="submission-details">
+            <div class="detail-row">
+              <span class="label">📅 Event Date:</span>
+              <span><%= new Date(submission.event_date).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) %></span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📍 Venue:</span>
+              <span><%= submission.venue %></span>
+            </div>
+            <div class="detail-row">
+              <span class="label">👥 Capacity:</span>
+              <span><%= submission.capacity %> attendees</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">💰 Fee:</span>
+              <span><%= submission.fee > 0 ? '₹' + submission.fee : 'Free' %></span>
+            </div>
+          </div>
+          
+          <% if (submission.status === 'pending') { %>
+            <div class="admin-actions-card">
+              <form method="POST" action="/admin/submissions/<%= submission.submission_id %>/approve" style="display: inline;">
+                <button type="submit" class="btn approve-btn" onclick="return confirm('Approve this event submission?')">
+                  ✅ Approve & Publish
+                </button>
+              </form>
+              
+              <button class="btn reject-btn" onclick="showRejectForm(<%= submission.submission_id %>)">
+                ❌ Reject
+              </button>
+              
+              <div id="reject-form-<%= submission.submission_id %>" class="reject-form" style="display: none;">
+                <form method="POST" action="/admin/submissions/<%= submission.submission_id %>/reject">
+                  <label for="reason-<%= submission.submission_id %>">Reason for rejection:</label>
+                  <textarea name="reason" id="reason-<%= submission.submission_id %>" required 
+                           placeholder="Please provide a reason for rejection..."></textarea>
+                  <div class="reject-actions">
+                    <button type="submit" class="btn reject-btn">Submit Rejection</button>
+                    <button type="button" class="btn" onclick="hideRejectForm(<%= submission.submission_id %>)">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% } else { %>
+            <div class="review-info">
+              <p><strong>Reviewed:</strong> <%= new Date(submission.reviewed_at).toLocaleDateString() %></p>
+              <% if (submission.admin_notes) { %>
+                <p><strong>Notes:</strong> <%= submission.admin_notes %></p>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<script>
+function showRejectForm(id) {
+  document.getElementById('reject-form-' + id).style.display = 'block';
+}
+
+function hideRejectForm(id) {
+  document.getElementById('reject-form-' + id).style.display = 'none';
+}
+</script>
+
+<%- include('partials/footer') %>

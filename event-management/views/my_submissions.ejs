@@ -1,0 +1,86 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <h1>📋 My Event Submissions</h1>
+  
+  <div class="submission-actions">
+    <a href="/user-events/submit" class="btn add-btn">➕ Submit New Event</a>
+  </div>
+  
+  <% if (submissions.length === 0) { %>
+    <div class="no-submissions">
+      <h3>📝 No submissions yet</h3>
+      <p>You haven't submitted any events for review. Ready to share your event with the community?</p>
+      <a href="/user-events/submit" class="btn">Submit Your First Event</a>
+    </div>
+  <% } else { %>
+    <div class="submissions-grid">
+      <% submissions.forEach(submission => { %>
+        <div class="submission-card status-<%= submission.status %>">
+          <div class="submission-header">
+            <h2><%= submission.title %></h2>
+            <span class="status-badge <%= submission.status %>">
+              <% if (submission.status === 'pending') { %>
+                ⏳ Pending Review
+              <% } else if (submission.status === 'approved') { %>
+                ✅ Approved
+              <% } else { %>
+                ❌ Rejected
+              <% } %>
+            </span>
+          </div>
+          
+          <p class="submission-description"><%= submission.description.substring(0, 150) %>...</p>
+          
+          <div class="submission-details">
+            <div class="detail-row">
+              <span class="label">📅 Event Date:</span>
+              <span><%= new Date(submission.event_date).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) %></span>
+            </div>
+            <div class="detail-row">
+              <span class="label">📍 Venue:</span>
+              <span><%= submission.venue %></span>
+            </div>
+            <div class="detail-row">
+              <span class="label">👥 Capacity:</span>
+              <span><%= submission.capacity %> attendees</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">💰 Fee:</span>
+              <span><%= submission.fee > 0 ? '₹' + submission.fee : 'Free' %></span>
+            </div>
+          </div>
+          
+          <div class="submission-meta">
+            <p class="submitted-date">
+              Submitted: <%= new Date(submission.submitted_at).toLocaleDateString() %>
+            </p>
+            
+            <% if (submission.status !== 'pending') { %>
+              <p class="review-date">
+                Reviewed: <%= new Date(submission.reviewed_at).toLocaleDateString() %>
+                <% if (submission.reviewer_name) { %>
+                  by <%= submission.reviewer_name %>
+                <% } %>
+              </p>
+            <% } %>
+            
+            <% if (submission.admin_notes) { %>
+              <div class="admin-notes">
+                <strong>Admin Notes:</strong>
+                <p><%= submission.admin_notes %></p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

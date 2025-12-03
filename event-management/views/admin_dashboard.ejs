@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <h1>Admin Dashboard</h1>
+  <div class="admin-actions">
+    <a href="/admin/create" class="btn add-btn">+ Create New Event</a>
+    <a href="/admin/submissions" class="btn">📋 Manage Submissions</a>
+  </div>
+  <div class="event-grid">
+    <% events.forEach(e => { %>
+      <div class="event-card">
+        <h2><%= e.title %></h2>
+        <p>Date: <%= e.event_date.toISOString().slice(0,10) %></p>
+        <a href="/admin/event/<%= e.event_id %>/participants" class="btn small">View Participants</a>
+      </div>
+    <% }) %>
+  </div>
+</section>
+<%- include('partials/footer') %>
