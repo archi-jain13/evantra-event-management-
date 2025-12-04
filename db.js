@@ -3,10 +3,10 @@ const mysql = require('mysql');
 const { promisify } = require('util');
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'arch2006#',       // <-- set your MySQL password
-  database: 'event_db',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'arch2006#',
+  database: process.env.DB_NAME || 'event_db',
   acquireTimeout: 60000,
   timeout: 60000,
   connectionLimit: 10

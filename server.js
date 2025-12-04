@@ -21,13 +21,13 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'event-management/views'));
 
 app.use(session({
-  secret: 'event_secret_key', // change this in production
+  secret: process.env.SESSION_SECRET || 'event_secret_key',
   resave: false,
   saveUninitialized: false,
   rolling: 
   true, // Reset expiration on every response
   cookie: {
-    secure: false, // set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // HTTPS in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours default (overridden when rememberMe is checked)
   }
