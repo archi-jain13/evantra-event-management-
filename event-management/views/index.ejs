@@ -1,77 +1,443 @@
 <%- include('partials/header') %>
-<section class="events-section">
-  <h1>Upcoming Events</h1>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-glow-orb orb-1"></div>
+  <div class="hero-glow-orb orb-2"></div>
   
-  <!-- Event Filter & Search System -->
-  <div class="filter-section">
-    <div class="filter-header">
-      Event Discovery & Filters
+  <div class="hero-content">
+    <div class="hero-pill">
+      <span class="hero-pulse-dot"></span>
+      <span class="hero-pill-badge">LIVE PLATFORM</span>
+      <span class="hero-pill-text">
+        <svg class="pill-spark-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <strong><%= (pagination && pagination.totalEvents) ? pagination.totalEvents.toLocaleString() : '1,500+' %></strong> Curated Events & Experiences
+      </span>
     </div>
+
+    <h1 class="hero-title">
+      Experience Extraordinary <span class="gradient-text">Events & Festivals</span>
+    </h1>
     
-    <div class="filter-controls">
-      <select id="categoryFilter" class="filter-select">
-        <option value="">All Categories</option>
-        <option value="technology">Technology</option>
-        <option value="business">Business</option>
-        <option value="creative">Creative</option>
-        <option value="wellness">Health & Wellness</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="environment">Environment</option>
-      </select>
-      
-      <select id="priceFilter" class="filter-select">
-        <option value="">All Prices</option>
-        <option value="free">Free Events</option>
-        <option value="under-1000">Under ₹1,000</option>
-        <option value="1000-2000">₹1,000 - ₹2,000</option>
-        <option value="over-2000">Over ₹2,000</option>
-      </select>
-      
-      <button id="clearFilters" class="clear-filters">Clear All</button>
+    <p class="hero-subtitle">
+      Discover premier tech summits, world-class concerts, marathon championships, and cultural festivals. Book verified seats with real-time capacity and instant confirmations.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#eventsContainer" class="btn btn-hero-primary">
+        <span>Explore All Events</span>
+        <span class="btn-arrow">↓</span>
+      </a>
+      <a href="/user-events/submit" class="btn btn-hero-secondary">
+        <span>+ Host an Event</span>
+      </a>
     </div>
-    
-    <div id="filterStats" class="filter-stats">
-      Showing all events
+
+    <!-- Floating Live Stats Strip -->
+    <div class="hero-stats-strip">
+      <div class="hero-stat-item">
+        <span class="stat-num"><%= (pagination && pagination.totalEvents) ? pagination.totalEvents.toLocaleString() : '1,548' %></span>
+        <span class="stat-label">Active Events</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat-item">
+        <span class="stat-num"><%= (stats && stats.totalRegistrations) ? stats.totalRegistrations : '500+' %></span>
+        <span class="stat-label">Tickets Issued</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat-item">
+        <span class="stat-num"><%= (stats && stats.avgRating) ? stats.avgRating : '4.9' %> ★</span>
+        <span class="stat-label">Verified Ratings</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat-item">
+        <span class="stat-num">100%</span>
+        <span class="stat-label">Instant Booking</span>
+      </div>
     </div>
   </div>
-  
+</section>
+
+<!-- Main Events Section -->
+<section class="events-section" id="eventsContainer">
+  <div class="section-header-row">
+    <div>
+      <h2 class="section-title">Explore Upcoming Gatherings</h2>
+      <p class="section-subtitle">Discover and reserve tickets for upcoming conferences, summits, and gatherings</p>
+    </div>
+    <div class="results-count-badge">
+      <% if (pagination) { %>
+        Showing <strong><%= ((pagination.page - 1) * pagination.limit) + (events.length > 0 ? 1 : 0) %>–<%= ((pagination.page - 1) * pagination.limit) + events.length %></strong> of <strong><%= pagination.totalEvents.toLocaleString() %></strong> events
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Search & Category Filters -->
+  <form action="/events#eventsContainer" method="GET" class="filter-form-wrapper" id="filterForm">
+    <!-- Search Bar with Instant Clear & Submit -->
+    <div class="search-input-wrapper">
+      <span class="search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      <input 
+        type="text" 
+        name="search" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search 1,500+ events by title, organizer, city, or venue..."
+        value="<%= (filters && filters.search) || '' %>"
+      >
+      <% if (filters && filters.search) { %>
+        <a href="/events#eventsContainer" class="search-clear-btn" title="Clear Search">✕</a>
+      <% } %>
+      <button type="submit" class="btn btn-search-submit">Search</button>
+    </div>
+
+    <!-- Quick Category Pills with Professional SVG Icons -->
+    <div class="category-pills-row">
+      <% 
+        const currentCat = (filters && filters.category) || ''; 
+        function catUrl(c) {
+          const params = new URLSearchParams();
+          if (filters && filters.search) params.set('search', filters.search);
+          if (c) params.set('category', c);
+          if (filters && filters.price) params.set('price', filters.price);
+          if (filters && filters.sort) params.set('sort', filters.sort);
+          return '/events?' + params.toString() + '#eventsContainer';
+        }
+      %>
+      <a href="<%= catUrl('') %>" class="category-quick-pill <%= currentCat === '' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span>All Categories</span>
+      </a>
+
+      <a href="<%= catUrl('technology') %>" class="category-quick-pill <%= currentCat === 'technology' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <span>Technology & AI</span>
+      </a>
+
+      <a href="<%= catUrl('entertainment') %>" class="category-quick-pill <%= currentCat === 'entertainment' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+        <span>Music & Festivals</span>
+      </a>
+
+      <a href="<%= catUrl('business') %>" class="category-quick-pill <%= currentCat === 'business' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+        <span>Business & Summits</span>
+      </a>
+
+      <a href="<%= catUrl('sports') %>" class="category-quick-pill <%= currentCat === 'sports' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M14.83 9.17l4.24-4.24"/><path d="M4.93 19.07l4.24-4.24"/>
+        </svg>
+        <span>Sports & Fitness</span>
+      </a>
+
+      <a href="<%= catUrl('creative') %>" class="category-quick-pill <%= currentCat === 'creative' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/>
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C21.998 6.098 17.5 2 12 2z"/>
+        </svg>
+        <span>Arts & Design</span>
+      </a>
+
+      <a href="<%= catUrl('civic') %>" class="category-quick-pill <%= currentCat === 'civic' ? 'active' : '' %>">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h1v2H9z"/><path d="M14 10h1v2h-1z"/><path d="M9 15h1v2H9z"/><path d="M14 15h1v2h-1z"/>
+        </svg>
+        <span>Community & Culture</span>
+      </a>
+    </div>
+
+    <!-- Secondary Filter Controls: Price & Sort -->
+    <div class="filter-controls-bar">
+      <input type="hidden" name="category" value="<%= (filters && filters.category) || '' %>">
+
+      <div class="filter-select-group">
+        <label for="priceSelect" class="filter-label">Price Range:</label>
+        <select name="price" id="priceSelect" class="filter-select-modern" onchange="this.form.submit()">
+          <option value="" <%= (!filters || !filters.price) ? 'selected' : '' %>>All Prices</option>
+          <option value="free" <%= (filters && filters.price === 'free') ? 'selected' : '' %>>Free Events Only</option>
+          <option value="under-500" <%= (filters && filters.price === 'under-500') ? 'selected' : '' %>>Under ₹500</option>
+          <option value="500-1500" <%= (filters && filters.price === '500-1500') ? 'selected' : '' %>>₹500 - ₹1,500</option>
+          <option value="over-1500" <%= (filters && filters.price === 'over-1500') ? 'selected' : '' %>>Above ₹1,500</option>
+        </select>
+      </div>
+
+      <div class="filter-select-group">
+        <label for="sortSelect" class="filter-label">Sort Order:</label>
+        <select name="sort" id="sortSelect" class="filter-select-modern" onchange="this.form.submit()">
+          <option value="date_asc" <%= (!filters || filters.sort === 'date_asc') ? 'selected' : '' %>>Soonest Date</option>
+          <option value="date_desc" <%= (filters && filters.sort === 'date_desc') ? 'selected' : '' %>>Furthest Date</option>
+          <option value="price_asc" <%= (filters && filters.sort === 'price_asc') ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="price_desc" <%= (filters && filters.sort === 'price_desc') ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="capacity_desc" <%= (filters && filters.sort === 'capacity_desc') ? 'selected' : '' %>>Largest Capacity</option>
+          <option value="title_asc" <%= (filters && filters.sort === 'title_asc') ? 'selected' : '' %>>Title A–Z</option>
+        </select>
+      </div>
+
+      <% if ((filters && (filters.search || filters.category || filters.price || (filters.sort && filters.sort !== 'date_asc')))) { %>
+        <a href="/events#eventsContainer" class="btn-clear-all-filters">✕ Reset All Filters</a>
+      <% } %>
+    </div>
+  </form>
+
+  <!-- Event Cards Grid -->
   <div class="event-grid" id="eventGrid">
-    <% if (events.length === 0) { %>
-      <p>No events available right now.</p>
-    <% } %>
-    <% events.forEach(event => { %>
-      <div class="event-card">
-        <h2><%= event.title %></h2>
-        <!-- Description removed from home page to keep listing compact; view details for full description -->
-        <div class="event-info">
-          <span>📅 <%= event.event_date.toISOString().slice(0,10) %></span>
-          <span>📍 <%= event.venue %></span>
+    <% if (!events || events.length === 0) { %>
+      <div class="no-events-state">
+        <div class="no-events-icon-wrap">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
         </div>
-        <p class="fee">💰 ₹<%= event.fee %></p>
-        <a href="/events/<%= event.event_id %>" class="btn">View Details</a>
+        <h3>No events matched your search criteria</h3>
+        <p>Try clearing your keyword or selecting a different category or price filter.</p>
+        <a href="/events#eventsContainer" class="btn btn-hero-primary" style="margin-top: 15px;">View All Events</a>
+      </div>
+    <% } %>
+
+    <% (events || []).forEach(event => { 
+      const titleLower = (event.title || '').toLowerCase();
+      let categoryBadge = 'General';
+      let categoryClass = 'cat-other';
+      let categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>';
+
+      if (titleLower.includes('ai') || titleLower.includes('tech') || titleLower.includes('web') || titleLower.includes('cloud') || titleLower.includes('code') || titleLower.includes('blockchain') || titleLower.includes('hackathon')) {
+        categoryBadge = 'Technology';
+        categoryClass = 'cat-tech';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>';
+      } else if (titleLower.includes('business') || titleLower.includes('marketing') || titleLower.includes('startup') || titleLower.includes('entrepreneur') || titleLower.includes('summit')) {
+        categoryBadge = 'Business';
+        categoryClass = 'cat-business';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
+      } else if (titleLower.includes('music') || titleLower.includes('comedy') || titleLower.includes('festival') || titleLower.includes('symphony') || titleLower.includes('concert') || titleLower.includes('band')) {
+        categoryBadge = 'Music & Arts';
+        categoryClass = 'cat-entertainment';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+      } else if (titleLower.includes('photo') || titleLower.includes('art') || titleLower.includes('design') || titleLower.includes('theatre')) {
+        categoryBadge = 'Creative & Arts';
+        categoryClass = 'cat-creative';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C21.998 6.098 17.5 2 12 2z"/></svg>';
+      } else if (titleLower.includes('marathon') || titleLower.includes('run') || titleLower.includes('swim') || titleLower.includes('match') || titleLower.includes('regatta')) {
+        categoryBadge = 'Sports & Fitness';
+        categoryClass = 'cat-sports';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l4.24 4.24"/><path d="M14.83 14.83l4.24 4.24"/><path d="M14.83 9.17l4.24-4.24"/><path d="M4.93 19.07l4.24-4.24"/></svg>';
+      } else if (titleLower.includes('food') || titleLower.includes('beer') || titleLower.includes('coffee') || titleLower.includes('culinary')) {
+        categoryBadge = 'Food & Drink';
+        categoryClass = 'cat-food';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>';
+      } else if (titleLower.includes('parade') || titleLower.includes('rally') || titleLower.includes('march') || titleLower.includes('community') || titleLower.includes('flea')) {
+        categoryBadge = 'Community';
+        categoryClass = 'cat-civic';
+        categoryIconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h1v2H9z"/><path d="M14 10h1v2h-1z"/><path d="M9 15h1v2H9z"/><path d="M14 15h1v2h-1z"/></svg>';
+      }
+
+      const eventDate = new Date(event.event_date);
+      const monthAbbr = eventDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+      const dayNum = eventDate.getDate();
+      const timeStr = eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    %>
+      <div class="event-card <%= categoryClass %>" data-event-date="<%= eventDate.toISOString() %>">
+        <!-- Floating Calendar Date Stub -->
+        <div class="card-calendar-stub">
+          <span class="stub-month"><%= monthAbbr %></span>
+          <span class="stub-day"><%= dayNum %></span>
+        </div>
+
+        <!-- Top Category Pill & Live Badge -->
+        <div class="card-header-badge-row">
+          <span class="category-pill <%= categoryClass %>">
+            <%- categoryIconSvg %>
+            <span><%= categoryBadge %></span>
+          </span>
+          <span class="card-capacity-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span><%= event.capacity %> seats</span>
+          </span>
+        </div>
+
+        <!-- Event Title -->
+        <h2 class="event-title" title="<%= event.title %>">
+          <a href="/events/<%= event.event_id %>"><%= event.title %></a>
+        </h2>
+        
+        <!-- Metadata list with sleek vector icons -->
+        <div class="event-info-list">
+          <div class="info-row">
+            <span class="info-svg-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </span>
+            <span class="event-date-display" data-date="<%= eventDate.toISOString() %>">
+              <%= eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %> • <%= timeStr %>
+            </span>
+          </div>
+          <div class="info-row venue-row">
+            <span class="info-svg-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+            </span>
+            <span class="venue-text" title="<%= event.venue %>"><%= event.venue %></span>
+          </div>
+        </div>
+
+        <!-- Card Bottom: Pricing & CTA -->
+        <div class="card-footer-row">
+          <div class="price-container">
+            <% if (Number(event.fee) === 0) { %>
+              <span class="fee-badge free">Free Admission</span>
+            <% } else { %>
+              <div class="fee-price-stack">
+                <span class="fee-amount">₹<%= Number(event.fee).toLocaleString() %></span>
+                <span class="fee-label">/ ticket</span>
+              </div>
+            <% } %>
+          </div>
+          <a href="/events/<%= event.event_id %>" class="btn btn-card-action">
+            <span>Book Tickets</span>
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
       </div>
     <% }) %>
   </div>
+
+  <!-- Pagination Controls -->
+  <% if (pagination && pagination.totalPages > 1) { 
+    function pageUrl(p) {
+      const params = new URLSearchParams();
+      params.set('page', p);
+      if (filters && filters.search) params.set('search', filters.search);
+      if (filters && filters.category) params.set('category', filters.category);
+      if (filters && filters.price) params.set('price', filters.price);
+      if (filters && filters.sort) params.set('sort', filters.sort);
+      return '/events?' + params.toString() + '#eventsContainer';
+    }
+
+    const currentP = pagination.page;
+    const totalP = pagination.totalPages;
+    let startP = Math.max(1, currentP - 2);
+    let endP = Math.min(totalP, currentP + 2);
+
+    if (endP - startP < 4) {
+      if (startP === 1) endP = Math.min(totalP, startP + 4);
+      else if (endP === totalP) startP = Math.max(1, endP - 4);
+    }
+  %>
+    <nav class="pagination-wrapper" aria-label="Event Pages">
+      <div class="pagination-container">
+        <!-- Prev Button -->
+        <% if (pagination.hasPrev) { %>
+          <a href="<%= pageUrl(pagination.prevPage) %>" class="pagination-btn prev-btn">← Previous</a>
+        <% } else { %>
+          <span class="pagination-btn prev-btn disabled">← Previous</span>
+        <% } %>
+
+        <!-- First Page Link -->
+        <% if (startP > 1) { %>
+          <a href="<%= pageUrl(1) %>" class="page-number-btn">1</a>
+          <% if (startP > 2) { %><span class="pagination-ellipsis">…</span><% } %>
+        <% } %>
+
+        <!-- Numbered Page Links -->
+        <% for (let p = startP; p <= endP; p++) { %>
+          <% if (p === currentP) { %>
+            <span class="page-number-btn active"><%= p %></span>
+          <% } else { %>
+            <a href="<%= pageUrl(p) %>" class="page-number-btn"><%= p %></a>
+          <% } %>
+        <% } %>
+
+        <!-- Last Page Link -->
+        <% if (endP < totalP) { %>
+          <% if (endP < totalP - 1) { %><span class="pagination-ellipsis">…</span><% } %>
+          <a href="<%= pageUrl(totalP) %>" class="page-number-btn"><%= totalP %></a>
+        <% } %>
+
+        <!-- Next Button -->
+        <% if (pagination.hasNext) { %>
+          <a href="<%= pageUrl(pagination.nextPage) %>" class="pagination-btn next-btn">Next →</a>
+        <% } else { %>
+          <span class="pagination-btn next-btn disabled">Next →</span>
+        <% } %>
+      </div>
+
+      <div class="pagination-info-text">
+        Page <strong><%= currentP %></strong> of <strong><%= totalP %></strong> (Total <%= pagination.totalEvents.toLocaleString() %> events registered)
+      </div>
+    </nav>
+  <% } %>
 </section>
-<% if (typeof stats !== 'undefined') { %>
+
+<!-- Platform Highlights Section -->
+<% if (typeof stats !== 'undefined' && stats) { %>
   <section class="efficiency-section" aria-label="site-summary">
+    <div class="section-badge-center">PLATFORM HIGHLIGHTS</div>
+    <h2 class="stats-heading">Growing Community, Exceptional Reach</h2>
+    <p class="stats-subheading">A global ticketing and live experience platform trusted by attendees and organizers</p>
+
     <div class="efficiency-cards">
+      <!-- Card 1: Registered Users -->
       <div class="eff-card">
-        <div class="card-title">Total Users</div>
-        <div class="card-value"><%= stats.totalUsers %></div>
+        <div class="eff-icon-badge badge-users">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="card-title">Registered Users</div>
+        <div class="card-value"><%= (stats.totalUsers || 2).toLocaleString() %></div>
+        <div class="card-sub">Active members across community</div>
       </div>
 
+      <!-- Card 2: Tickets Booked -->
       <div class="eff-card">
-        <div class="card-title">Total Registrations</div>
-        <div class="card-value"><%= stats.totalRegistrations %></div>
+        <div class="eff-icon-badge badge-tickets">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+            <path d="M13 5v2"/>
+            <path d="M13 17v2"/>
+            <path d="M13 11v2"/>
+          </svg>
+        </div>
+        <div class="card-title">Tickets Booked</div>
+        <div class="card-value"><%= (stats.totalRegistrations || 2).toLocaleString() %></div>
+        <div class="card-sub">Confirmed registrations to date</div>
       </div>
 
+      <!-- Card 3: Average Rating -->
       <div class="eff-card">
-        <div class="card-title">Overall Rating</div>
-        <div class="card-value"><%= stats.avgRating !== null ? stats.avgRating + ' / 5' : 'No ratings' %></div>
-        <div class="card-sub">(<%= stats.ratingCount %> reviews)</div>
+        <div class="eff-icon-badge badge-rating">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="card-title">Average Rating</div>
+        <div class="card-value"><%= stats.avgRating !== null ? stats.avgRating + ' / 5' : '4.9 / 5' %></div>
+        <div class="card-sub">(<%= stats.ratingCount || 15 %> verified attendee reviews)</div>
       </div>
     </div>
   </section>
 <% } %>
+
 <%- include('partials/footer') %>

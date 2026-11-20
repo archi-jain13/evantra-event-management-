@@ -1,18 +1,469 @@
 <%- include('partials/header') %>
-<section class="events-section">
-  <h1>Admin Dashboard</h1>
-  <div class="admin-actions">
-    <a href="/admin/create" class="btn add-btn">+ Create New Event</a>
-    <a href="/admin/submissions" class="btn">📋 Manage Submissions</a>
+
+<section class="events-section admin-dashboard-section">
+  <!-- Top Admin Control Header -->
+  <div class="section-header-row admin-header-flex">
+    <div>
+      <h1 class="section-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-3px; margin-right:8px; color:#0284c7;">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Executive Operations & Analytics</span>
+      </h1>
+      <p class="section-subtitle">Real-time performance metrics, ticketing revenue, and master event management</p>
+    </div>
+
+    <div class="admin-top-action-bar">
+      <a href="/admin/export-events-csv" class="btn btn-admin-export" title="Export entire master event catalog as CSV">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Export Catalog (.csv)</span>
+      </a>
+
+      <a href="/admin/submissions" class="btn btn-admin-inbox">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+        </svg>
+        <span>Proposals Inbox (<%= kpis.pendingSubmissions %>)</span>
+      </a>
+
+      <a href="/admin/create" class="btn btn-hero-primary" style="padding: 10px 20px;">
+        <span>+ Create Event</span>
+      </a>
+    </div>
   </div>
-  <div class="event-grid">
-    <% events.forEach(e => { %>
-      <div class="event-card">
-        <h2><%= e.title %></h2>
-        <p>Date: <%= e.event_date.toISOString().slice(0,10) %></p>
-        <a href="/admin/event/<%= e.event_id %>/participants" class="btn small">View Participants</a>
+
+  <!-- 📊 4 KPI Stat Badges (Glassmorphism) -->
+  <div class="admin-kpi-grid">
+    <!-- KPI 1: Total Events -->
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-blue">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
       </div>
-    <% }) %>
+      <div class="kpi-content">
+        <div class="kpi-title">TOTAL ACTIVE EVENTS</div>
+        <div class="kpi-number"><%= kpis.totalEvents.toLocaleString() %></div>
+        <div class="kpi-sub">Master platform catalog</div>
+      </div>
+    </div>
+
+    <!-- KPI 2: Gross Revenue -->
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-green">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">GROSS REVENUE</div>
+        <div class="kpi-number">₹<%= Number(kpis.totalRevenue).toLocaleString() %></div>
+        <div class="kpi-sub">Verified payment settlements</div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Total Tickets Booked -->
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-pink">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">TICKETS ALLOTTED</div>
+        <div class="kpi-number"><%= kpis.totalTickets.toLocaleString() %></div>
+        <div class="kpi-sub">Confirmed registrations</div>
+      </div>
+    </div>
+
+    <!-- KPI 4: Pending Proposals -->
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-amber">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">PENDING PROPOSALS</div>
+        <div class="kpi-number"><%= kpis.pendingSubmissions %></div>
+        <div class="kpi-sub">Awaiting moderation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📈 Featured Full-Width Chart: Revenue & Booking Velocity -->
+  <div class="admin-chart-card admin-chart-card-full" style="margin-bottom: 24px;">
+    <div class="chart-card-header">
+      <div>
+        <h3 class="chart-title">Revenue & Booking Velocity</h3>
+        <p class="chart-sub">Daily ticket sales volume and gross revenue timeline (powered by SQL aggregate groupings)</p>
+      </div>
+      <div class="chart-legend-row">
+        <span class="legend-badge-item badge-rev">
+          <span class="legend-dot dot-rev"></span> Daily Revenue (₹)
+        </span>
+        <span class="legend-badge-item badge-tix">
+          <span class="legend-dot dot-tix"></span> Tickets Booked
+        </span>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap" style="height: 280px;">
+      <canvas id="velocityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 📈 Category & Top Events Grid -->
+  <div class="admin-charts-grid">
+    <!-- Chart 1: Categories Breakdown -->
+    <div class="admin-chart-card">
+      <div class="chart-card-header">
+        <div>
+          <h3 class="chart-title">Events by Category</h3>
+          <p class="chart-sub">Volume distribution across event disciplines</p>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Top Events Attendance -->
+    <div class="admin-chart-card">
+      <div class="chart-card-header">
+        <div>
+          <h3 class="chart-title">Top Bestselling Events</h3>
+          <p class="chart-sub">Events ranked by confirmed ticket registrations</p>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="topEventsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📋 Master Management Table -->
+  <div class="admin-table-card">
+    <div class="table-header-flex">
+      <div>
+        <h3 class="table-card-title">Live Events Management Roster</h3>
+        <p class="table-card-sub">Browse, inspect participant rosters, and export attendance records</p>
+      </div>
+
+      <form action="/admin" method="GET" class="table-search-form">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="table-search-icon">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Filter by title or venue..." 
+          value="<%= search || '' %>" 
+          class="table-search-input"
+        >
+        <% if (search) { %>
+          <a href="/admin" class="table-search-clear">✕</a>
+        <% } %>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="admin-modern-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Event Title</th>
+            <th>Schedule</th>
+            <th>Venue</th>
+            <th>Pricing</th>
+            <th>Bookings / Cap</th>
+            <th style="text-align: right;">Roster Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!events || events.length === 0) { %>
+            <tr>
+              <td colspan="7" class="empty-table-cell">No events found matching your search.</td>
+            </tr>
+          <% } %>
+          <% (events || []).forEach(e => { %>
+            <tr>
+              <td class="col-id">#<%= e.event_id %></td>
+              <td class="col-title">
+                <a href="/events/<%= e.event_id %>" class="event-title-link" target="_blank">
+                  <strong><%= e.title %></strong>
+                </a>
+              </td>
+              <td class="col-date">
+                <%= (new Date(e.event_date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+              </td>
+              <td class="col-venue" title="<%= e.venue %>">
+                <%= e.venue %>
+              </td>
+              <td class="col-fee">
+                <% if (Number(e.fee) === 0) { %>
+                  <span class="badge-free-table">Free</span>
+                <% } else { %>
+                  <span class="fee-text">₹<%= Number(e.fee).toLocaleString() %></span>
+                <% } %>
+              </td>
+              <td class="col-capacity">
+                <span class="booked-num"><strong><%= e.total_booked || 0 %></strong></span>
+                <span class="cap-num">/ <%= e.capacity %></span>
+              </td>
+              <td class="col-actions">
+                <div class="action-btn-row">
+                  <a href="/admin/event/<%= e.event_id %>/participants" class="btn-roster-link" title="View attendees roster">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>Roster</span>
+                  </a>
+                  <a href="/admin/event/<%= e.event_id %>/export-csv" class="btn-csv-link" title="Export attendee roster (.csv)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Real-time Audit Activity Feed -->
+    <% if (typeof auditLogs !== 'undefined' && auditLogs && auditLogs.length > 0) { %>
+      <div class="audit-feed-card">
+        <div class="audit-header">
+          <div class="audit-header-left">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #0284c7;">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <h3 class="audit-title">Live Platform Activity Log</h3>
+          </div>
+          <span class="audit-pill-badge">Real-Time Transactions</span>
+        </div>
+
+        <div class="audit-list">
+          <% auditLogs.forEach(log => { 
+            let badgeClass = 'badge-general';
+            if (log.action_type.includes('CANCEL')) badgeClass = 'badge-cancelled';
+            else if (log.action_type.includes('BOOK')) badgeClass = 'badge-booked';
+            else if (log.action_type.includes('SUBMIT')) badgeClass = 'badge-submitted';
+          %>
+            <div class="audit-list-item">
+              <div class="audit-item-meta">
+                <span class="audit-badge <%= badgeClass %>"><%= log.action_type %></span>
+                <span class="audit-timestamp">
+                  <%= (new Date(log.created_at)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %> • <%= (new Date(log.created_at)).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+              </div>
+              <div class="audit-desc"><%= log.description %></div>
+              <% if (log.user_name) { %>
+                <div class="audit-user">Actor: <strong><%= log.user_name %></strong></div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
   </div>
 </section>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.body.classList.contains('dark');
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
+    // 1. Category Doughnut Chart
+    const categoryData = <%- JSON.stringify(categoryStats) %>;
+    const catLabels = Object.keys(categoryData);
+    const catValues = Object.values(categoryData);
+
+    const ctxCat = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxCat, {
+      type: 'doughnut',
+      data: {
+        labels: catLabels,
+        datasets: [{
+          data: catValues,
+          backgroundColor: [
+            '#0284c7', // Tech - Cyan
+            '#9333ea', // Music - Purple
+            '#d97706', // Business - Amber
+            '#ea580c', // Sports - Orange
+            '#4f46e5', // Creative - Indigo
+            '#64748b'  // Community - Slate
+          ],
+          borderWidth: 2,
+          borderColor: isDark ? '#1e293b' : '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              color: textColor,
+              boxWidth: 12,
+              padding: 16,
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: 600 }
+            }
+          }
+        },
+        cutout: '68%'
+      }
+    });
+
+    // 2. Top Events Bar Chart
+    const topEvents = <%- JSON.stringify(topEvents) %>;
+    const eventLabels = topEvents.map(e => e.title.length > 22 ? e.title.substring(0, 22) + '…' : e.title);
+    const eventBookings = topEvents.map(e => e.booked_tickets);
+
+    const ctxTop = document.getElementById('topEventsChart').getContext('2d');
+    new Chart(ctxTop, {
+      type: 'bar',
+      data: {
+        labels: eventLabels,
+        datasets: [{
+          label: 'Tickets Booked',
+          data: eventBookings,
+          backgroundColor: 'rgba(37, 99, 235, 0.85)',
+          hoverBackgroundColor: '#2563eb',
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+          x: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, precision: 0 }
+          },
+          y: {
+            grid: { display: false },
+            ticks: {
+              color: textColor,
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 3. Revenue & Booking Velocity Dual-Axis Line Chart
+    <% if (typeof velocityTimeline !== 'undefined' && velocityTimeline && velocityTimeline.length > 0) { %>
+      const velocityData = <%- JSON.stringify(velocityTimeline) %>;
+      const velLabels = velocityData.map(v => v.label);
+      const velRevenue = velocityData.map(v => v.revenue);
+      const velTickets = velocityData.map(v => v.tickets);
+
+      const ctxVel = document.getElementById('velocityChart').getContext('2d');
+      const revGrad = ctxVel.createLinearGradient(0, 0, 0, 260);
+      revGrad.addColorStop(0, 'rgba(2, 132, 199, 0.35)');
+      revGrad.addColorStop(1, 'rgba(2, 132, 199, 0.0)');
+
+      new Chart(ctxVel, {
+        type: 'line',
+        data: {
+          labels: velLabels,
+          datasets: [
+            {
+              label: 'Daily Revenue (₹)',
+              data: velRevenue,
+              borderColor: '#0284c7',
+              backgroundColor: revGrad,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.38,
+              pointBackgroundColor: '#0284c7',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Tickets Booked',
+              data: velTickets,
+              borderColor: '#10b981',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              borderDash: [5, 5],
+              tension: 0.38,
+              pointBackgroundColor: '#10b981',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              titleColor: isDark ? '#ffffff' : '#0f172a',
+              bodyColor: isDark ? '#cbd5e1' : '#475569',
+              borderColor: isDark ? '#334155' : '#e2e8f0',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 } }
+            },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              grid: { color: gridColor },
+              ticks: {
+                color: textColor,
+                callback: val => '₹' + Number(val).toLocaleString(),
+                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
+              }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: {
+                color: textColor,
+                callback: val => Math.round(val) + ' tix',
+                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }
+              }
+            }
+          }
+        }
+      });
+    <% } %>
+  });
+</script>
+
 <%- include('partials/footer') %>

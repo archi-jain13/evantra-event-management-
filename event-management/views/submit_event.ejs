@@ -1,10 +1,10 @@
 <%- include('partials/header') %>
 <section class="form-section">
-  <h1>📅 Submit Your Event</h1>
+  <h1>Submit Your Event Proposal</h1>
   
   <% if (typeof success !== 'undefined') { %>
     <div class="success-message">
-      <h3>✅ Success!</h3>
+      <h3>Success!</h3>
       <p><%= success %></p>
       <a href="/user-events/my-submissions" class="btn">View My Submissions</a>
     </div>
@@ -12,13 +12,13 @@
     
     <% if (typeof error !== 'undefined') { %>
       <div class="error-message">
-        <h3>❌ Error</h3>
+        <h3>Submission Notice</h3>
         <p><%= error %></p>
       </div>
     <% } %>
     
     <div class="submit-info">
-      <h3>🌟 Share Your Event with the Community!</h3>
+      <h3>Host Your Event with Our Platform</h3>
       <p>Submit your event for review and approval. Once approved, it will be visible to all users and they can register for it.</p>
       
       <div class="submission-process">

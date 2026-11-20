@@ -43,19 +43,29 @@ A full-stack web application connecting event organizers, participants, and admi
 ---
 
 ## Slide 4: Database Design
-**7 Core Tables:**
+**8 Core Tables:**
 
 | Table | Purpose |
 |-------|---------|
 | users | User accounts with role-based access |
-| events | Event details and metadata |
-| registrations | User event bookings |
-| payments | Payment tracking |
-| event_submissions | Community-submitted events |
-| reviews | Ratings and feedback |
-| password_reset_tokens | Secure password recovery |
+| events | Event details, venue, capacity & pricing |
+| registrations | User event bookings (composite unique constraints) |
+| payments | Payment verification & transaction tracking |
+| event_submissions | Community-submitted events for admin moderation |
+| reviews | Star ratings (1-5) and attendee feedback |
+| password_reset_tokens | Secure token-based credential recovery |
+| audit_logs | Automated event registration compliance logs |
 
-**Features:** Foreign key constraints, cascading deletes, unique constraints
+**DBMS Features:** Foreign key constraints (`ON DELETE CASCADE`), B-Tree indexes, automated triggers (`trg_after_registration`), and SQL Views (`event_summary_view`, `user_booking_view`).
+
+---
+
+## Slide 4b: Real-World Dataset & Production Scale
+**Kaggle / Municipal OpenData Integration:**
+- **Source:** Special Events & Public Assemblies Dataset (Kaggle / OpenData)
+- **Scale:** **1,500+ authentic real-world events** across concerts, sports, conventions, cultural parades, tech summits, and festivals
+- **Data Engineering:** Automated universal CSV ingestion pipeline (`import_csv.js`) handling title normalization, venue resolution, capacity estimation, and rolling future schedule offsets
+- **Dual-Engine Persistence:** Automatic detection and zero-dependency fallback between MySQL connection pooling and embedded SQLite (`event_db.sqlite`)
 
 ---
 

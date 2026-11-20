@@ -6,8 +6,15 @@ const db = require('../../db');
 const router = express.Router();
 
 // render login/register pages
-router.get('/login', (req, res) => res.render('login'));
-router.get('/register', (req, res) => res.render('register'));
+router.get('/login', (req, res) => {
+  if (req.session && req.session.user) return res.redirect('/events');
+  res.render('login');
+});
+
+router.get('/register', (req, res) => {
+  if (req.session && req.session.user) return res.redirect('/my-events');
+  res.render('register');
+});
 
 // handle register
 router.post('/register', async (req, res) => {

@@ -1,19 +1,262 @@
 <%- include('partials/header') %>
 <section class="events-section">
-  <h1>My Registered Events</h1>
-  <% if (registrations.length === 0) { %>
-    <p>You haven’t registered for any events yet.</p>
+  <!-- Status Alert Messages -->
+  <% if (typeof query !== 'undefined' && query) { %>
+    <% if (query.cancelled) { %>
+      <div class="alert-glass-banner alert-banner-success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="banner-icon">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <div class="banner-text">
+          <strong>Reservation Cancelled & Refund Processed</strong>
+          <span>Your seats have been immediately released back to the event pool. A full refund has been credited to your payment method.</span>
+        </div>
+      </div>
+    <% } else if (query.booked) { %>
+      <div class="alert-glass-banner alert-banner-success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="banner-icon">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <div class="banner-text">
+          <strong>Booking Confirmed!</strong>
+          <span>Your digital pass has been generated. You can view, print, or add it to your calendar below.</span>
+        </div>
+      </div>
+    <% } else if (query.rebooked) { %>
+      <div class="alert-glass-banner alert-banner-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div class="banner-text">
+          <strong>Reservation Re-activated!</strong>
+          <span>Your tickets have been secured and confirmed.</span>
+        </div>
+      </div>
+    <% } else if (query.error) { %>
+      <div class="alert-glass-banner alert-banner-danger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <div class="banner-text">
+          <strong>Action Failed</strong>
+          <span><%= query.error %></span>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <div class="section-header-row">
+    <div>
+      <h1 class="section-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-3px; margin-right:8px; color:#2563eb;">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+        </svg>
+        <span>My Event Tickets</span>
+      </h1>
+      <p class="section-subtitle">Manage your event reservations, digital admission passes, and real-time seat allocations</p>
+    </div>
+  </div>
+
+  <% if (!registrations || registrations.length === 0) { %>
+    <div class="no-events-state">
+      <div style="margin-bottom: 14px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+        </svg>
+      </div>
+      <h3>You haven’t registered for any events yet</h3>
+      <p>Browse our exciting catalog of upcoming events and reserve your seats today!</p>
+      <a href="/events" class="btn" style="margin-top: 15px;">Explore Upcoming Events</a>
+    </div>
   <% } else { %>
-    <div class="event-grid">
-      <% registrations.forEach(r => { %>
-        <div class="event-card">
-          <h2><%= r.title %></h2>
-          <p>Tickets: <%= r.ticket_count %></p>
-          <p>Amount: ₹<%= r.amount %> — <span class="status <%= r.status %>"><%= r.status %></span></p>
-          <p>📅 <%= r.event_date.toISOString().slice(0,10) %></p>
+    <div class="tickets-grid">
+      <% registrations.forEach(r => { 
+        const isCancelled = r.reg_status === 'cancelled' || r.payment_status === 'refunded';
+      %>
+        <div class="ticket-card-modern <%= isCancelled ? 'ticket-card-cancelled' : '' %>" data-event-date="<%= (new Date(r.event_date)).toISOString() %>">
+          <div class="ticket-stub-left">
+            <% if (isCancelled) { %>
+              <div class="ticket-status-pill status-cancelled">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-1px; margin-right:4px;">
+                  <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>CANCELLED & REFUNDED</span>
+              </div>
+            <% } else { %>
+              <div class="ticket-status-pill status-confirmed">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline-block; vertical-align:-1px; margin-right:4px;">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>CONFIRMED</span>
+              </div>
+            <% } %>
+
+            <h2 class="ticket-event-title <%= isCancelled ? 'title-muted' : '' %>"><%= r.title %></h2>
+            
+            <div class="ticket-details-list">
+              <div class="ticket-detail-item">
+                <span class="detail-label">Date & Time</span>
+                <span class="detail-val event-date-display" data-date="<%= (new Date(r.event_date)).toISOString() %>">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <%= (new Date(r.event_date)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %>
+                </span>
+              </div>
+              <div class="ticket-detail-item">
+                <span class="detail-label">Venue</span>
+                <span class="detail-val">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <%= r.venue %>
+                </span>
+              </div>
+
+              <% if (isCancelled) { %>
+                <div class="ticket-detail-item cancelled-note">
+                  <span class="detail-label">Seat Status</span>
+                  <span class="detail-val text-amber">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:4px;">
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                      <path d="M3 3v5h5"/>
+                    </svg>
+                    Seats released to public pool • 100% Refunded
+                  </span>
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="ticket-divider-notch"></div>
+
+          <div class="ticket-stub-right">
+            <div class="ticket-count-badge <%= isCancelled ? 'badge-cancelled' : '' %>">
+              <span class="count-num"><%= r.ticket_count %></span>
+              <span class="count-lbl">Ticket<%= r.ticket_count > 1 ? 's' : '' %></span>
+            </div>
+            <div class="ticket-paid-amount">
+              <%= isCancelled ? 'Refunded:' : 'Paid:' %> <strong>₹<%= Number(r.amount || 0).toLocaleString() %></strong>
+            </div>
+            <div class="ticket-meta-id">
+              Pass ID: #<%= String(r.reg_id).padStart(5, '0') %>
+            </div>
+
+            <div class="ticket-action-btns">
+              <% if (!isCancelled) { %>
+                <a href="/my-events/ticket/<%= r.reg_id %>" class="btn-view-pass" title="View & Print Official E-Ticket Pass">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:4px;">
+                    <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                  </svg>
+                  <span>Pass</span>
+                </a>
+                <a href="/my-events/calendar/<%= r.reg_id %>" class="btn-cal-link" title="Add to Calendar (.ics)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </a>
+                <button type="button" 
+                  class="btn-cancel-ticket" 
+                  title="Cancel reservation & release seats"
+                  onclick="openCancelModal('<%= r.reg_id %>', '<%= (r.title || '').replace(/'/g, "\\'") %>', '<%= r.ticket_count %>', '<%= Number(r.amount || 0).toLocaleString() %>')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:3px;">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span>Cancel</span>
+                </button>
+              <% } else { %>
+                <a href="/events/<%= r.event_id %>" class="btn-rebook-ticket" title="Reserve seats again for this event">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-1px; margin-right:4px;">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                  <span>Re-book</span>
+                </a>
+                <a href="/my-events/ticket/<%= r.reg_id %>" class="btn-view-pass btn-pass-void" title="View void ticket pass">
+                  <span>View Void Pass</span>
+                </a>
+              <% } %>
+            </div>
+          </div>
         </div>
       <% }) %>
     </div>
   <% } %>
 </section>
+
+<!-- Frosted Glass Ticket Cancellation Confirmation Modal -->
+<div id="cancelTicketModal" class="cancel-modal-overlay" style="display: none;">
+  <div class="cancel-modal-card">
+    <div class="cancel-modal-header">
+      <div class="modal-warning-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="modal-title">Cancel Reservation</h3>
+        <p class="modal-sub">Seat release & refund confirmation</p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeCancelModal()">✕</button>
+    </div>
+
+    <div class="modal-body-content">
+      <p class="modal-prompt">
+        Are you sure you want to cancel your reservation for:
+      </p>
+      <div class="modal-event-summary">
+        <h4 id="modalEventTitle" class="summary-title">Event Title</h4>
+        <div class="summary-meta-row">
+          <span>Tickets: <strong id="modalTicketCount">1</strong></span>
+          <span>Refund Credit: <strong id="modalRefundAmount">₹0</strong></span>
+        </div>
+      </div>
+      <div class="modal-consequence-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="box-icon">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>Your reserved seats will be instantly restored to the event capacity so other attendees can book them. A 100% refund will be credited to your account.</span>
+      </div>
+    </div>
+
+    <form id="cancelTicketForm" method="POST" action="">
+      <div class="modal-actions-row">
+        <button type="button" class="btn-modal-cancel" onclick="closeCancelModal()">Keep My Tickets</button>
+        <button type="submit" class="btn-modal-confirm-refund">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Confirm Cancellation & Refund
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openCancelModal(regId, title, ticketCount, amount) {
+    document.getElementById('modalEventTitle').textContent = title;
+    document.getElementById('modalTicketCount').textContent = ticketCount + (ticketCount > 1 ? ' tickets' : ' ticket');
+    document.getElementById('modalRefundAmount').textContent = '₹' + amount;
+    document.getElementById('cancelTicketForm').action = '/my-events/cancel/' + regId;
+    document.getElementById('cancelTicketModal').style.display = 'flex';
+  }
+
+  function closeCancelModal() {
+    document.getElementById('cancelTicketModal').style.display = 'none';
+  }
+
+  // Close modal when clicking backdrop
+  document.getElementById('cancelTicketModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCancelModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeCancelModal();
+    }
+  });
+</script>
+
 <%- include('partials/footer') %>

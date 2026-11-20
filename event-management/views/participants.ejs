@@ -1,0 +1,136 @@
+<%- include('partials/header') %>
+<section class="events-section">
+  <div class="breadcrumb-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 2rem;">
+    <a href="/admin" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      <span>Back to Admin Center</span>
+    </a>
+
+    <div class="admin-actions" style="margin: 0;">
+      <a href="/admin/event/<%= eventId %>/export-csv" class="btn btn-ticket-primary" style="padding: 8px 18px; font-size: 0.88rem;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Export Roster (.csv)</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="section-header-row">
+    <div>
+      <h1 class="section-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:-3px; margin-right:8px; color:#0284c7;">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>Participant Roster</span>
+      </h1>
+      <p class="section-subtitle">
+        Viewing confirmed attendees for <strong><%= typeof eventTitle !== 'undefined' ? eventTitle : ('Event #' + eventId) %></strong>
+      </p>
+    </div>
+  </div>
+
+  <% 
+    let totalTickets = 0;
+    let totalRevenue = 0;
+    if (participants && participants.length > 0) {
+      participants.forEach(p => {
+        totalTickets += Number(p.ticket_count) || 0;
+        totalRevenue += Number(p.amount) || 0;
+      });
+    }
+  %>
+
+  <div class="admin-kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 30px;">
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">TOTAL BOOKINGS</div>
+        <div class="kpi-number"><%= participants.length %></div>
+        <div class="kpi-sub">Verified orders</div>
+      </div>
+    </div>
+
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-pink">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2 2Z"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">TICKETS ALLOTTED</div>
+        <div class="kpi-number"><%= totalTickets %></div>
+        <div class="kpi-sub">Total seats confirmed</div>
+      </div>
+    </div>
+
+    <div class="admin-kpi-card">
+      <div class="kpi-icon-wrap kpi-green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-title">SETTLED REVENUE</div>
+        <div class="kpi-number">₹<%= totalRevenue.toLocaleString() %></div>
+        <div class="kpi-sub">Event earnings</div>
+      </div>
+    </div>
+  </div>
+
+  <% if (!participants || participants.length === 0) { %>
+    <div class="no-events-state">
+      <div style="margin-bottom: 12px;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h3>No attendees registered yet</h3>
+      <p>When users book tickets for this event, their registration details and verified payment status will appear here.</p>
+    </div>
+  <% } else { %>
+    <div class="admin-table-card">
+      <div class="table-responsive">
+        <table class="admin-modern-table">
+          <thead>
+            <tr>
+              <th>Reg ID</th>
+              <th>Attendee Name</th>
+              <th>Email Address</th>
+              <th>Tickets</th>
+              <th>Amount Paid</th>
+              <th>Registration Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% participants.forEach(p => { %>
+              <tr>
+                <td class="col-id">#<%= String(p.reg_id).padStart(5, '0') %></td>
+                <td><strong><%= p.name %></strong></td>
+                <td class="col-venue"><%= p.email %></td>
+                <td><span class="booked-num"><%= p.ticket_count %></span></td>
+                <td><span class="fee-text">₹<%= Number(p.amount || 0).toLocaleString() %></span></td>
+                <td class="col-date">
+                  <%= (new Date(p.reg_date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                </td>
+                <td>
+                  <span class="badge-free-table" style="background:#dcfce7; color:#15803d; border-color:#86efac;">
+                    <%= (p.status || 'completed').toUpperCase() %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

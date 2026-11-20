@@ -42,13 +42,26 @@ app.use((req, res, next) => {
 // mount routes
 app.use('/', authRoutes);          // login/register/logout and pages
 app.use('/events', eventRoutes);   // listing + details
-app.use('/register', registerRoutes); // registration
+app.use('/register', registerRoutes); // registration (POST /register/:id)
+app.use('/my-events', registerRoutes); // user's registered events (GET /my-events)
+app.use('/my_events', registerRoutes); // alternative path with underscore
 app.use('/admin', adminRoutes);    // admin panel
 app.use('/user-events', userEventRoutes); // user event submissions
 app.use('/reviews', reviewsRoutes); // event reviews
 
-// Backwards-compatibility redirect for older links
-app.get('/my_events', (req, res) => res.redirect('/register'));
+// Explicit top-level fallbacks so tickets & calendar always resolve seamlessly
+app.get('/my-events/ticket/:regId', (req, res, next) => {
+  req.url = '/ticket/' + req.params.regId;
+  registerRoutes(req, res, next);
+});
+app.get('/my-events/calendar/:regId', (req, res, next) => {
+  req.url = '/calendar/' + req.params.regId;
+  registerRoutes(req, res, next);
+});
+app.post('/my-events/cancel/:regId', (req, res, next) => {
+  req.url = '/cancel/' + req.params.regId;
+  registerRoutes(req, res, next);
+});
 
 app.get('/', (req, res) => res.redirect('/events'));
 

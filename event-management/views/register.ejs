@@ -1,12 +1,43 @@
 <%- include('partials/header') %>
-<section class="form-section">
-  <h1>Create Account</h1>
-  <form action="/register" method="POST" class="form-card">
-    <input type="text" name="name" placeholder="Full Name" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit" class="btn full">Register</button>
-    <p>Already have an account? <a href="/login">Login</a></p>
-  </form>
+<section class="auth-page-section">
+  <div class="auth-card-modern">
+    <div class="auth-header">
+      <div class="auth-icon-circle">✨</div>
+      <h1>Create Your Account</h1>
+      <p>Join Evantra to discover and book unforgettable experiences</p>
+    </div>
+
+    <form action="/register" method="POST" class="auth-form-styled">
+      <div class="form-group-modern">
+        <label for="name">Full Name</label>
+        <div class="input-with-icon">
+          <span class="field-icon">👤</span>
+          <input type="text" id="name" name="name" placeholder="John Doe" required class="modern-input">
+        </div>
+      </div>
+
+      <div class="form-group-modern">
+        <label for="email">Email Address</label>
+        <div class="input-with-icon">
+          <span class="field-icon">✉️</span>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required class="modern-input">
+        </div>
+      </div>
+
+      <div class="form-group-modern">
+        <label for="password">Password</label>
+        <div class="input-with-icon">
+          <span class="field-icon">🔒</span>
+          <input type="password" id="password" name="password" placeholder="Create a secure password" minlength="4" required class="modern-input">
+        </div>
+      </div>
+
+      <button type="submit" class="btn full btn-auth-submit">Create Free Account</button>
+
+      <div class="auth-card-footer">
+        Already registered? <a href="/login">Sign In here</a>
+      </div>
+    </form>
+  </div>
 </section>
 <%- include('partials/footer') %>

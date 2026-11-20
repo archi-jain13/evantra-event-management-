@@ -30,16 +30,16 @@
           </div>
           
           <div class="submitter-info">
-            <strong>👤 Submitted by:</strong> <%= submission.submitter_name %> (<%= submission.submitter_email %>)
+            <strong>Submitted by:</strong> <%= submission.submitter_name %> (<%= submission.submitter_email %>)
             <br>
-            <strong>📅 Submitted:</strong> <%= new Date(submission.submitted_at).toLocaleDateString() %>
+            <strong>Submitted on:</strong> <%= new Date(submission.submitted_at).toLocaleDateString() %>
           </div>
           
           <p class="submission-description"><%= submission.description %></p>
           
           <div class="submission-details">
             <div class="detail-row">
-              <span class="label">📅 Event Date:</span>
+              <span class="label">Event Date:</span>
               <span><%= new Date(submission.event_date).toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
